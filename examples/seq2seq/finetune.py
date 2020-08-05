@@ -348,6 +348,14 @@ class TranslationModule(SummarizationModule):
 
 
 def main(args, model=None) -> SummarizationModule:
+    # by tok : 乱数のシードを固定
+    #seed = 10
+    #np.random.seed(seed)
+    #torch.manual_seed(seed)
+    # by tok : gpusというargumentが設定されているように見なかったので1でハードコーディングしてみた
+    #args.gpus = 1
+    #print(f'args.gpus : {args.gpus}')
+
     Path(args.output_dir).mkdir(exist_ok=True)
     if len(os.listdir(args.output_dir)) > 3 and args.do_train:
         raise ValueError("Output directory ({}) already exists and is not empty.".format(args.output_dir))

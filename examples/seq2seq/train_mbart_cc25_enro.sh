@@ -2,7 +2,7 @@
 export PYTHONPATH="../":"${PYTHONPATH}"
 
 python finetune.py \
-    --learning_rate=3e-5 \
+    --learning_rate=3e-6 \
     --fp16 \
     --do_train \
     --do_predict \
@@ -17,4 +17,5 @@ python finetune.py \
     --freeze_embeds \
     --early_stopping_patience 4 \
     --model_name_or_path=facebook/mbart-large-cc25 \
+    --gpus 1 \
     $@
