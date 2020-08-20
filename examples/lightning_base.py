@@ -61,6 +61,7 @@ class BaseTransformer(pl.LightningModule):
         self.tfmr_ckpts = {}
         self.output_dir = Path(self.hparams.output_dir)
         cache_dir = self.hparams.cache_dir if self.hparams.cache_dir else None
+        # モデル名から、mBartモデルのconfigが呼び出されている
         if config is None:
             self.config = AutoConfig.from_pretrained(
                 self.hparams.config_name if self.hparams.config_name else self.hparams.model_name_or_path,
@@ -77,6 +78,7 @@ class BaseTransformer(pl.LightningModule):
                 assert hasattr(self.config, p), f"model config doesn't have a `{p}` attribute"
                 setattr(self.config, p, getattr(self.hparams, p))
 
+        # tokenizerのオブジェクトを呼び出しただけ？
         if tokenizer is None:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.hparams.tokenizer_name if self.hparams.tokenizer_name else self.hparams.model_name_or_path,
@@ -84,7 +86,7 @@ class BaseTransformer(pl.LightningModule):
             )
         else:
             self.tokenizer: PreTrainedTokenizer = tokenizer
-        self.model_type = MODEL_MODES[mode]
+        self.model_type = MODEL_MODES[mode] # AutoModelForSeq2SeqLM クラス
         if model is None:
             self.model = self.model_type.from_pretrained(
                 self.hparams.model_name_or_path,
