@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 export PYTHONPATH="../":"${PYTHONPATH}"
+export ENRO_DIR=${PWD}/wmt_short
+export MAX_LEN=200
+export BS=4
+export GAS=8
 
 python finetune.py \
     --learning_rate=3e-6 \
@@ -18,4 +22,8 @@ python finetune.py \
     --early_stopping_patience 4 \
     --model_name_or_path=facebook/mbart-large-cc25 \
     --gpus 1 \
+    --output_dir enro_finetune_baseline_short \
+    --label_smoothing 0.1 \
+    --fp16_opt_level=O1 \
+    --sortish_sampler \
     $@
