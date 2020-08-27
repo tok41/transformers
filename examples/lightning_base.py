@@ -23,6 +23,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 
+from transformers import EncoderDecoderModel, BertTokenizer
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +64,7 @@ class BaseTransformer(pl.LightningModule):
         self.output_dir = Path(self.hparams.output_dir)
         cache_dir = self.hparams.cache_dir if self.hparams.cache_dir else None
         # モデル名から、mBartモデルのconfigが呼び出されている
+        # EncDecモデルの場合は、コメントアウトする
         if config is None:
             self.config = AutoConfig.from_pretrained(
                 self.hparams.config_name if self.hparams.config_name else self.hparams.model_name_or_path,
@@ -79,6 +82,7 @@ class BaseTransformer(pl.LightningModule):
                 setattr(self.config, p, getattr(self.hparams, p))
 
         # tokenizerのオブジェクトを呼び出しただけ？
+        # EncDecモデルの場合は、コメントアウトする
         if tokenizer is None:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.hparams.tokenizer_name if self.hparams.tokenizer_name else self.hparams.model_name_or_path,
@@ -86,16 +90,27 @@ class BaseTransformer(pl.LightningModule):
             )
         else:
             self.tokenizer: PreTrainedTokenizer = tokenizer
+        
         self.model_type = MODEL_MODES[mode] # AutoModelForSeq2SeqLM クラス
+
         if model is None:
             self.model = self.model_type.from_pretrained(
                 self.hparams.model_name_or_path,
                 from_tf=bool(".ckpt" in self.hparams.model_name_or_path),
-                config=self.config,
+                config=self.config, # EncDecモデルの場合、コメントアウトする
                 cache_dir=cache_dir,
             )
         else:
             self.model = model
+        
+        """ # テスト的にハードコーディングでモデルを定義
+        base_bert = "cl-tohoku/bert-base-japanese-whole-word-masking"
+        self.tokenizer = BertTokenizer.from_pretrained(base_bert)
+        self.model = EncoderDecoderModel.from_encoder_decoder_pretrained(base_bert, base_bert)
+        self.config = self.model.config """
+        # EncDecモデルでのtokenizerの設定
+        #base_bert = "cl-tohoku/bert-base-japanese-whole-word-masking"
+        #self.tokenizer = BertTokenizer.from_pretrained(base_bert)
 
     def load_hf_checkpoint(self, *args, **kwargs):
         self.model = self.model_type.from_pretrained(*args, **kwargs)
@@ -313,7 +328,7 @@ def generic_train(
 
     if args.gpus > 1:
         train_params["distributed_backend"] = "ddp"
-
+    
     trainer = pl.Trainer.from_argparse_args(
         args,
         weights_summary=None,

@@ -110,6 +110,7 @@ class SummarizationModule(BaseTransformer):
         if self.model.config.decoder_start_token_id is None and isinstance(self.tokenizer, MBartTokenizer):
             self.decoder_start_token_id = self.tokenizer.lang_code_to_id[hparams.tgt_lang]
             self.model.config.decoder_start_token_id = self.decoder_start_token_id
+        #self.decoder_start_token_id = self.model.config.decoder.pad_token_id # EncDecモデルで必要
         if isinstance(self.tokenizer, MBartTokenizer):
             self.dataset_class = MBartDataset # Seq2SeqDatasetを継承したクラス ファイルの拡張子やトークナイザーの設定?
         else:
@@ -148,6 +149,7 @@ class SummarizationModule(BaseTransformer):
             lm_labels = target_ids[:, 1:].clone()  # why clone?
 
         outputs = self(source_ids, attention_mask=source_mask, decoder_input_ids=decoder_input_ids, use_cache=False)
+        #outputs = self(source_ids, attention_mask=source_mask, decoder_input_ids=decoder_input_ids) # EncDecモデル
 
         if self.hparams.label_smoothing == 0:
             # Same behavior as modeling_bart.py
@@ -366,7 +368,9 @@ def main(args, model=None) -> SummarizationModule:
         or str(args.output_dir).startswith("/tmp")
         or str(args.output_dir).startswith("/var")
     ):
-        logger = True  # don't pollute wandb logs unnecessarily
+        #logger = True  # don't pollute wandb logs unnecessarily
+        from pytorch_lightning import loggers as pl_loggers
+        logger = pl_loggers.TensorBoardLogger('logs/')
     elif args.logger_name == "wandb":
         from pytorch_lightning.loggers import WandbLogger
 
