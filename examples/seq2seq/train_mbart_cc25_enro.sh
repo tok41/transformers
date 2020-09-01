@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 export PYTHONPATH="../":"${PYTHONPATH}"
-export ENRO_DIR=${PWD}/kw_full
-export MAX_LEN=100
-export BS=8
+export ENRO_DIR=${PWD}/wmt_en_ro
+export MAX_LEN=128
+export BS=4
 export GAS=8
 
 python finetune.py \
@@ -11,7 +11,7 @@ python finetune.py \
     --do_train \
     --do_predict \
     --adam_eps 1e-06 \
-    --num_train_epochs 10 --src_lang ja_XX --tgt_lang ja_XX \
+    --num_train_epochs 5 --src_lang en_XX --tgt_lang ro_RO \
     --data_dir $ENRO_DIR \
     --max_source_length $MAX_LEN --max_target_length $MAX_LEN --val_max_target_length $MAX_LEN --test_max_target_length $MAX_LEN \
     --train_batch_size=$BS --eval_batch_size=$BS --gradient_accumulation_steps=$GAS \
@@ -21,7 +21,7 @@ python finetune.py \
     --early_stopping_patience -1 \
     --model_name_or_path=facebook/mbart-large-cc25 \
     --gpus 1 \
-    --output_dir jaja_finetune_mbart01 \
+    --output_dir enro_finetune_mbart01 \
     --label_smoothing 0.1 \
     --fp16_opt_level=O1 \
     --sortish_sampler \
